@@ -56,12 +56,17 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final isAzanEnabled = prefs.getBool('isAzanEnabled') ?? true;
-    // Default: 'mohamd_gazy' (Must match EXACTLY the file name in assets without extension)
     final selectedMoazzen = prefs.getString('selectedMoazzen') ?? 'mohamd_gazy';
+
+    // Load Fajr Alarm Status
+    final settings = await FajrAlarmService().getSettings();
+    final isFajrAlarmEnabled = settings['enabled'] ?? false;
+
     emit(
       state.copyWith(
         isAzanEnabled: isAzanEnabled,
         selectedMoazzen: selectedMoazzen,
+        isFajrAlarmEnabled: isFajrAlarmEnabled,
       ),
     );
   }
@@ -194,6 +199,15 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
       params,
     );
     FajrAlarmService().scheduleAlarm(tomorrowPrayerTimes.fajr);
+  }
+
+  void refreshFajrAlarm() async {
+    // Reload state (enabled/disabled)
+    final settings = await FajrAlarmService().getSettings();
+    final isFajrAlarmEnabled = settings['enabled'] ?? false;
+    emit(state.copyWith(isFajrAlarmEnabled: isFajrAlarmEnabled));
+
+    _calculatePrayerTimes();
   }
 
   void _startTimer() {

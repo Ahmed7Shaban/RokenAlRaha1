@@ -15,6 +15,7 @@ class SmartContainerState extends Equatable {
   final bool isPrayerReminderEnabled;
   final int prayerReminderDelay;
   final Map<String, List<String>> completedPrayers;
+  final bool isFajrAlarmEnabled;
 
   const SmartContainerState({
     required this.currentTime,
@@ -31,6 +32,7 @@ class SmartContainerState extends Equatable {
     this.isPrayerReminderEnabled = false,
     this.prayerReminderDelay = 10,
     this.completedPrayers = const {},
+    this.isFajrAlarmEnabled = false,
   });
 
   SmartContainerState copyWith({
@@ -48,6 +50,7 @@ class SmartContainerState extends Equatable {
     bool? isPrayerReminderEnabled,
     int? prayerReminderDelay,
     Map<String, List<String>>? completedPrayers,
+    bool? isFajrAlarmEnabled,
   }) {
     return SmartContainerState(
       currentTime: currentTime ?? this.currentTime,
@@ -65,6 +68,7 @@ class SmartContainerState extends Equatable {
           isPrayerReminderEnabled ?? this.isPrayerReminderEnabled,
       prayerReminderDelay: prayerReminderDelay ?? this.prayerReminderDelay,
       completedPrayers: completedPrayers ?? this.completedPrayers,
+      isFajrAlarmEnabled: isFajrAlarmEnabled ?? this.isFajrAlarmEnabled,
     );
   }
 
@@ -84,5 +88,6 @@ class SmartContainerState extends Equatable {
     isPrayerReminderEnabled,
     prayerReminderDelay,
     completedPrayers,
+    isFajrAlarmEnabled,
   ];
 }

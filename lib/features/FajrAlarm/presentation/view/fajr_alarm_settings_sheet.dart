@@ -4,6 +4,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../services/fajr_alarm_service.dart';
 import 'fajr_alarm_screen.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../Home/presention/views/SmartContainer/cubit/smart_container_cubit.dart';
+
 class FajrAlarmSettingsSheet extends StatefulWidget {
   const FajrAlarmSettingsSheet({super.key});
 
@@ -39,6 +42,9 @@ class _FajrAlarmSettingsSheetState extends State<FajrAlarmSettingsSheet> {
       _enabled = value;
     });
     await _service.saveSettings(enabled: value, offset: _offset);
+    if (mounted) {
+      context.read<SmartContainerCubit>().refreshFajrAlarm();
+    }
   }
 
   @override
@@ -110,11 +116,14 @@ class _FajrAlarmSettingsSheetState extends State<FajrAlarmSettingsSheet> {
                   onChanged: (val) {
                     setState(() => _offset = val.toInt());
                   },
-                  onChangeEnd: (val) {
-                    _service.saveSettings(
+                  onChangeEnd: (val) async {
+                    await _service.saveSettings(
                       enabled: _enabled,
                       offset: val.toInt(),
                     );
+                    if (mounted) {
+                      context.read<SmartContainerCubit>().refreshFajrAlarm();
+                    }
                   },
                 ),
               ],

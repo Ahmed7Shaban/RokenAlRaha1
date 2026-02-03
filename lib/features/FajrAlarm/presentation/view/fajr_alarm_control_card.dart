@@ -4,6 +4,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../services/fajr_alarm_service.dart';
 import 'fajr_alarm_screen.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../Home/presention/views/SmartContainer/cubit/smart_container_cubit.dart';
+
 class FajrAlarmControlCard extends StatefulWidget {
   const FajrAlarmControlCard({super.key});
 
@@ -40,9 +43,11 @@ class _FajrAlarmControlCardState extends State<FajrAlarmControlCard> {
     });
     // Save
     await _service.saveSettings(enabled: value, offset: _offset);
-    // Note: Re-scheduling usually requires Fajr Time.
-    // Ideally this widget should have access to SmartContainerCubit to get prayer times.
-    // For now we just save preferences. The SmartContainerCubit refresh loop or init should handle scheduling.
+
+    // Reschedule immediately
+    if (mounted) {
+      context.read<SmartContainerCubit>().refreshFajrAlarm();
+    }
   }
 
   void _showSettingsSheet() {
@@ -120,11 +125,17 @@ class _FajrAlarmControlCardState extends State<FajrAlarmControlCard> {
                             () => _offset = val.toInt(),
                           ); // Update parent too
                         },
-                        onChangeEnd: (val) {
-                          _service.saveSettings(
+                        onChangeEnd: (val) async {
+                          await _service.saveSettings(
                             enabled: _enabled,
                             offset: val.toInt(),
                           );
+                          // Reschedule immediately
+                          if (mounted) {
+                            context
+                                .read<SmartContainerCubit>()
+                                .refreshFajrAlarm();
+                          }
                         },
                       ),
                     ],
@@ -166,80 +177,89 @@ class _FajrAlarmControlCardState extends State<FajrAlarmControlCard> {
   Widget build(BuildContext context) {
     if (_isLoading) return const SizedBox.shrink();
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA), // Light greyish
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 4),
-            blurRadius: 10,
+    return BlocBuilder<SmartContainerCubit, SmartContainerState>(
+      builder: (context, state) {
+        // Sync local state with global state if needed
+        if (_enabled != state.isFajrAlarmEnabled) {
+          _enabled = state.isFajrAlarmEnabled;
+        }
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F9FA), // Light greyish
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                offset: const Offset(0, 4),
+                blurRadius: 10,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: _showSettingsSheet,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                // Icon Box
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _enabled
-                        ? AppColors.primaryColor
-                        : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.wb_twilight_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // Texts
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "منبه الفجر الذكي 🕌",
-                        style: GoogleFonts.tajawal(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryColor,
-                        ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _showSettingsSheet,
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    // Icon Box
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: state.isFajrAlarmEnabled
+                            ? AppColors.primaryColor
+                            : Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _enabled
-                            ? "نشط - قبل الفجر بـ $_offset دقيقة"
-                            : "المنبه غير مفعل",
-                        style: GoogleFonts.tajawal(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
+                      child: Icon(
+                        Icons.wb_twilight_rounded,
+                        color: Colors.white,
+                        size: 28,
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                    const SizedBox(width: 16),
 
-                // Arrow or Setting Icon
-                Icon(Icons.settings, color: Colors.grey.shade400),
-              ],
+                    // Texts
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "منبه الفجر الذكي 🕌",
+                            style: GoogleFonts.tajawal(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            state.isFajrAlarmEnabled
+                                ? "نشط - قبل الفجر بـ $_offset دقيقة"
+                                : "المنبه غير مفعل",
+                            style: GoogleFonts.tajawal(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Arrow or Setting Icon
+                    Icon(Icons.settings, color: Colors.grey.shade400),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

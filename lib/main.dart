@@ -29,12 +29,12 @@ import 'services/adhan.dart';
 import 'core/services/notification_service.dart';
 import 'features/Home/presention/views/QuranPage/tafsir/data/models/translation_data.dart';
 import 'package:roken_al_raha/features/Home/presention/views/AudioQuran/cubit/audio_quran_cubit.dart';
+import 'package:roken_al_raha/features/Home/presention/views/SmartContainer/cubit/smart_container_cubit.dart';
 import 'package:roken_al_raha/core/widgets/global_audio_overlay.dart';
 import 'package:roken_al_raha/services/hadith_notification_service.dart';
 import 'features/Home/presention/views/AllAzkar/services/azkar_notification_helper.dart';
 import 'features/Home/presention/views/Masbaha/services/masbaha_notification_helper.dart';
 
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:roken_al_raha/features/FajrAlarm/presentation/view/fajr_alarm_screen.dart';
 
 Future<void> main() async {
@@ -97,15 +97,8 @@ Future<void> initializeHeavyServices() async {
 
   // Notifications
   final notificationService = NotificationService();
-  await notificationService.init();
-
-  // Setup listener for notification clicks
-  notificationService.plugin.initialize(
-    const InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/launcher_icon'),
-      iOS: DarwinInitializationSettings(),
-    ),
-    onDidReceiveNotificationResponse: (details) {
+  await notificationService.init(
+    onNotificationClick: (details) {
       if (details.payload == 'fajr_alarm') {
         navigatorKey.currentState?.push(
           MaterialPageRoute(builder: (_) => const FajrAlarmScreen()),
@@ -142,6 +135,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => LastReadCubit(LastReadRepository())),
         // Promoted to Global for Floating Player
         BlocProvider(create: (context) => AudioQuranCubit()),
+        // Promoted to Global for Fajr Alarm Control
+        BlocProvider(create: (context) => SmartContainerCubit()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812), // Standard design size

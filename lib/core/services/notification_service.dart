@@ -27,7 +27,9 @@ class NotificationService {
   bool _isInitialized = false;
 
   /// 1. Initialize the notification plugin with error handling
-  Future<void> init() async {
+  Future<void> init({
+    void Function(fln.NotificationResponse)? onNotificationClick,
+  }) async {
     if (_isInitialized) return;
 
     try {
@@ -66,9 +68,11 @@ class NotificationService {
 
       await _flutterLocalNotificationsPlugin.initialize(
         initializationSettings,
-        onDidReceiveNotificationResponse: (fln.NotificationResponse details) {
-          debugPrint("Notification Clicked: ${details.payload}");
-        },
+        onDidReceiveNotificationResponse:
+            onNotificationClick ??
+            (fln.NotificationResponse details) {
+              debugPrint("Notification Clicked: ${details.payload}");
+            },
       );
 
       // Create Channels
@@ -89,18 +93,21 @@ class NotificationService {
       'azan_ahmed_1',
       'azan_ahmed_2',
       'mohamd_gazy',
+      'alarm', // Added alarm just in case
     ];
 
     for (var sound in sounds) {
       try {
         final fln.AndroidNotificationChannel channel =
             fln.AndroidNotificationChannel(
-              'azan_channel_${sound}_v2', // Updated ID to force recreation
+              'azan_channel_${sound}_v3', // Updated to v3 to force recreation
               'الأذان (${_getSoundDisplayName(sound)})', // Descriptive Title
               description: 'تنبيهات الأذان بصوت ${_getSoundDisplayName(sound)}',
               importance: fln.Importance.max,
               playSound: true,
               sound: fln.RawResourceAndroidNotificationSound(sound),
+              audioAttributesUsage:
+                  fln.AudioAttributesUsage.alarm, // Ensure alarm usage
             );
 
         await _flutterLocalNotificationsPlugin
@@ -214,6 +221,25 @@ class NotificationService {
         importance: fln.Importance.high,
       ),
     );
+
+    // Create Fajr Alarm Channel explicitly
+    await _createFajrAlarmChannel(platform);
+  }
+
+  Future<void> _createFajrAlarmChannel(
+    fln.AndroidFlutterLocalNotificationsPlugin? platform,
+  ) async {
+    const fln.AndroidNotificationChannel channel =
+        fln.AndroidNotificationChannel(
+          'fajr_alarm_channel_v2',
+          'منبه الفجر الذكي',
+          description: 'تنبيه ذكي لصلاة الفجر',
+          importance: fln.Importance.max,
+          sound: fln.RawResourceAndroidNotificationSound('alarm'),
+          playSound: true,
+          audioAttributesUsage: fln.AudioAttributesUsage.alarm,
+        );
+    await platform?.createNotificationChannel(channel);
   }
 
   /// Schedule Hamed (Gratitude) Daily Reminder
@@ -460,7 +486,7 @@ class NotificationService {
     // Identify the correct sound file
     final String soundFileName = _mapMoazzenToFileName(moazzenKey);
     // Construct the channel ID that corresponds to this sound
-    final String channelId = 'azan_channel_${soundFileName}_v2';
+    final String channelId = 'azan_channel_${soundFileName}_v3';
 
     for (var prayer in prayers) {
       DateTime scheduledTime = prayer['time'] as DateTime;
@@ -556,7 +582,7 @@ class NotificationService {
           icon: '@mipmap/launcher_icon',
         ),
         iOS: fln.DarwinNotificationDetails(
-          sound: soundFileName.isNotEmpty ? '$soundFileName.aiff' : null,
+          sound: soundFileName.isNotEmpty ? '$soundFileName.mp3' : null,
           presentSound: true,
           interruptionLevel: fln.InterruptionLevel.timeSensitive,
         ),
@@ -1146,7 +1172,7 @@ class NotificationService {
 
     const fln.AndroidNotificationDetails androidPlatformChannelSpecifics =
         fln.AndroidNotificationDetails(
-          'fajr_alarm_channel',
+          'fajr_alarm_channel_v2',
           'منبه الفجر الذكي',
           channelDescription: 'تنبيه ذكي لصلاة الفجر',
           importance: fln.Importance.max,

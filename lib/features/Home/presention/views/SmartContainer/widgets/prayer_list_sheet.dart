@@ -276,11 +276,25 @@ class PrayerListSheet extends StatelessWidget {
                       builder: (context) => const FajrAlarmSettingsSheet(),
                     );
                   },
-                  icon: const Icon(
-                    Icons.alarm_add,
-                    color: AppColors.goldenYellow,
+                  icon: Icon(
+                    context.read<SmartContainerCubit>().state.isFajrAlarmEnabled
+                        ? Icons.alarm_on
+                        : Icons.alarm_add,
+                    color:
+                        context
+                            .read<SmartContainerCubit>()
+                            .state
+                            .isFajrAlarmEnabled
+                        ? Colors.green
+                        : AppColors.goldenYellow,
                   ),
-                  tooltip: "إعدادات منبه الفجر",
+                  tooltip:
+                      context
+                          .read<SmartContainerCubit>()
+                          .state
+                          .isFajrAlarmEnabled
+                      ? "منبه الفجر مفعل"
+                      : "تفعيل منبه الفجر",
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                   visualDensity: VisualDensity.compact,

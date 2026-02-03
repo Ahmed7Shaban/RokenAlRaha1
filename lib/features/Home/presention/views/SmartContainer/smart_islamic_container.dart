@@ -13,10 +13,7 @@ class SmartIslamicContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SmartContainerCubit(),
-      child: const _SmartIslamicContainerContent(),
-    );
+    return const _SmartIslamicContainerContent();
   }
 }
 
