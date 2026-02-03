@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../routes/routes.dart';
@@ -14,12 +13,9 @@ class SplahView extends StatefulWidget {
 }
 
 class _SplahViewState extends State<SplahView> {
-  final AudioPlayer _player = AudioPlayer();
-
   @override
   void initState() {
     super.initState();
-    _playIntroSound();
 
     // Auto navigation after animations check for onboarding
     Future.delayed(const Duration(milliseconds: 3500), () async {
@@ -40,13 +36,8 @@ class _SplahViewState extends State<SplahView> {
     });
   }
 
-  Future<void> _playIntroSound() async {
-    await _player.play(AssetSource('Sounds/StartSound.mp3'));
-  }
-
   @override
   void dispose() {
-    _player.dispose();
     super.dispose();
   }
 

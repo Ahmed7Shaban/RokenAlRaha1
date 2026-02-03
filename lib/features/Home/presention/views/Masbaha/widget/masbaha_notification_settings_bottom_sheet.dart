@@ -33,14 +33,14 @@ class _MasbahaNotificationSettingsBottomSheetState
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       // Tasbeeh Load
-      _isTasbeehEnabled = prefs.getBool('tasbeeh_notif_enabled') ?? false;
+      _isTasbeehEnabled = prefs.getBool('tasbeeh_notif_enabled') ?? true;
       final tHour = prefs.getInt('tasbeeh_notif_hour') ?? 10;
       final tMinute = prefs.getInt('tasbeeh_notif_minute') ?? 0;
       _tasbeehTime = TimeOfDay(hour: tHour, minute: tMinute);
 
       // Istighfar Load
-      _isIstighfarEnabled = prefs.getBool('istighfar_notif_enabled') ?? false;
-      final iHour = prefs.getInt('istighfar_notif_hour') ?? 10;
+      _isIstighfarEnabled = prefs.getBool('istighfar_notif_enabled') ?? true;
+      final iHour = prefs.getInt('istighfar_notif_hour') ?? 16;
       final iMinute = prefs.getInt('istighfar_notif_minute') ?? 0;
       _istighfarTime = TimeOfDay(hour: iHour, minute: iMinute);
 

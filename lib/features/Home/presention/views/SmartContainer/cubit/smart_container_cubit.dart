@@ -55,8 +55,7 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final isAzanEnabled = prefs.getBool('isAzanEnabled') ?? true;
-    final selectedMoazzen =
-        prefs.getString('selectedMoazzen') ?? 'Mishary Rashid';
+    final selectedMoazzen = prefs.getString('selectedMoazzen') ?? 'mohamd_gazy';
     emit(
       state.copyWith(
         isAzanEnabled: isAzanEnabled,
@@ -320,7 +319,7 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
   Future<void> _loadPrayerStats() async {
     final prefs = await SharedPreferences.getInstance();
     final bool reminderEnabled =
-        prefs.getBool('isPrayerReminderEnabled') ?? false;
+        prefs.getBool('isPrayerReminderEnabled') ?? true;
     final int delay = prefs.getInt('prayerReminderDelay') ?? 10;
 
     // Load Completed Prayers: Map<String, List<String>> -> e.g., "2024-05-20": ["Fajr", "Dhuhr"]

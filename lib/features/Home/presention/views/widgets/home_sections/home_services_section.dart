@@ -10,6 +10,7 @@ class HomeServicesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SubTitle(subTitle: 'استكشف مميزات ركن الراحة'),
         const SizedBox(height: 10),

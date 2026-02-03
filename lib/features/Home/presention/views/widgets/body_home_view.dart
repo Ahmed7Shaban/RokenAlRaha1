@@ -9,6 +9,7 @@ import 'home_sections/home_quiz_section.dart';
 import 'home_sections/home_services_section.dart';
 import 'home_sections/home_azkar_section.dart';
 import 'home_sections/home_khatma_section.dart';
+import 'home_sections/home_support_section.dart';
 
 class BodyHomeView extends StatefulWidget {
   const BodyHomeView({super.key});
@@ -57,8 +58,13 @@ class _BodyHomeViewState extends State<BodyHomeView> {
           const SizedBox(height: 24),
 
           // Footer (Khatma CTA)
+          // Footer (Khatma CTA)
           const HomeKhatmaSection(),
-          const SizedBox(height: 40), // Bottom padding
+          const SizedBox(height: 16),
+
+          // Support Section
+          const HomeSupportSection(),
+          const SizedBox(height: 20), // Bottom padding
         ],
       ),
     );

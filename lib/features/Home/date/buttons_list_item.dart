@@ -5,6 +5,7 @@ import '../presention/views/Hamed/hamed_view.dart';
 import '../presention/views/Masbaha/IstighfarView/istighfar_view.dart';
 import '../presention/views/Masbaha/TasbeehView/tasbeeh_view.dart';
 import '../presention/views/QuranPage/SurahView/quran_page_view.dart';
+import '../../Support/presentation/view/support_view.dart';
 
 final List<Map<String, dynamic>> itemsQ = [
   {
@@ -43,5 +44,13 @@ final List<Map<String, dynamic>> itemsMasbaha = [
     "title": "مرافئ الحمد",
     "image": "assets/Images/backimg3.jpg",
     "page": const HamedView(),
+  },
+];
+
+final List<Map<String, dynamic>> itemsSupport = [
+  {
+    "title": "الدعم والتواصل",
+    "image": "assets/Images/ramadan.jpg",
+    "page": const SupportView(),
   },
 ];

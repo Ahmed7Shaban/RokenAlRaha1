@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' as intl;
 import '../../../../../../core/theme/app_colors.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../../FajrAlarm/presentation/view/fajr_alarm_settings_sheet.dart';
 import '../cubit/smart_container_cubit.dart';
 
 class PrayerListSheet extends StatelessWidget {
@@ -184,27 +185,37 @@ class PrayerListSheet extends StatelessWidget {
                   // ---------------------------------
                   const SizedBox(height: 20),
                   _buildPrayerRow(
+                    context,
                     'الفجر',
                     prayerTimes.fajr,
                     prayerTimes.nextPrayer() == Prayer.fajr,
                   ),
-                  _buildPrayerRow('الشروق', prayerTimes.sunrise, false),
                   _buildPrayerRow(
+                    context,
+                    'الشروق',
+                    prayerTimes.sunrise,
+                    false,
+                  ),
+                  _buildPrayerRow(
+                    context,
                     'الظهر',
                     prayerTimes.dhuhr,
                     prayerTimes.nextPrayer() == Prayer.dhuhr,
                   ),
                   _buildPrayerRow(
+                    context,
                     'العصر',
                     prayerTimes.asr,
                     prayerTimes.nextPrayer() == Prayer.asr,
                   ),
                   _buildPrayerRow(
+                    context,
                     'المغرب',
                     prayerTimes.maghrib,
                     prayerTimes.nextPrayer() == Prayer.maghrib,
                   ),
                   _buildPrayerRow(
+                    context,
                     'العشاء',
                     prayerTimes.isha,
                     prayerTimes.nextPrayer() == Prayer.isha,
@@ -219,7 +230,14 @@ class PrayerListSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildPrayerRow(String name, DateTime time, bool isNext) {
+  Widget _buildPrayerRow(
+    BuildContext context,
+    String name,
+    DateTime time,
+    bool isNext,
+  ) {
+    bool isFajr = name == 'الفجر';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -233,13 +251,42 @@ class PrayerListSheet extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            name,
-            style: GoogleFonts.tajawal(
-              fontSize: 16,
-              fontWeight: isNext ? FontWeight.bold : FontWeight.w500,
-              color: isNext ? AppColors.primaryColor : Colors.black87,
-            ),
+          Row(
+            children: [
+              Text(
+                name,
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  fontWeight: isNext ? FontWeight.bold : FontWeight.w500,
+                  color: isNext ? AppColors.primaryColor : Colors.black87,
+                ),
+              ),
+              if (isFajr) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.white,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(24),
+                        ),
+                      ),
+                      builder: (context) => const FajrAlarmSettingsSheet(),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.alarm_add,
+                    color: AppColors.goldenYellow,
+                  ),
+                  tooltip: "إعدادات منبه الفجر",
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ],
           ),
           Text(
             intl.DateFormat('h:mm a', 'ar').format(time),

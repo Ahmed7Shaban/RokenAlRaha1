@@ -8,6 +8,7 @@ class HomeKhatmaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SubTitle(subTitle: "ابدأ رحلة الختم الآن"),
         const KhatmaImageButton(),

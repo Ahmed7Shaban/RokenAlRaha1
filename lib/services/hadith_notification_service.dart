@@ -3,17 +3,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:roken_al_raha/features/Home/presention/views/Hadith/data/repositories/hadith_repository.dart';
 import 'dart:math';
 import '../core/services/notification_service.dart';
+import '../core/constants/notification_ids.dart';
 
 class HadithNotificationService {
   static const String _prefEnabledKey = 'hadith_notification_enabled';
   static const String _prefHourKey = 'hadith_notification_hour';
   static const String _prefMinuteKey = 'hadith_notification_minute';
-  static const int _notificationId = 777; // Unique ID for Hadith Notification
+  // static const int _notificationId = 777; // Removed to use global ID
 
   /// Initialize: Load settings and re-schedule if needed (e.g. on app start)
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final isEnabled = prefs.getBool(_prefEnabledKey) ?? false;
+    final isEnabled = prefs.getBool(_prefEnabledKey) ?? true;
 
     if (isEnabled) {
       final hour = prefs.getInt(_prefHourKey) ?? 8; // Default 8 AM
@@ -26,7 +27,7 @@ class HadithNotificationService {
   static Future<Map<String, dynamic>> getSettings() async {
     final prefs = await SharedPreferences.getInstance();
     return {
-      'enabled': prefs.getBool(_prefEnabledKey) ?? false,
+      'enabled': prefs.getBool(_prefEnabledKey) ?? true,
       'time': TimeOfDay(
         hour: prefs.getInt(_prefHourKey) ?? 8,
         minute: prefs.getInt(_prefMinuteKey) ?? 0,
@@ -54,12 +55,12 @@ class HadithNotificationService {
   /// Cancel the notification
   static Future<void> cancelNotification() async {
     // Cancel legacy static notification
-    await NotificationService().cancelNotification(_notificationId);
+    await NotificationService().cancelNotification(NotificationIds.hadithDaily);
 
     // Cancel batch notifications (ids 777000 to 777030)
     for (int i = 0; i < 30; i++) {
       await NotificationService().cancelNotification(
-        _notificationId * 1000 + i,
+        NotificationIds.hadithDaily * 1000 + i,
       );
     }
   }
@@ -126,7 +127,7 @@ class HadithNotificationService {
         }
 
         await NotificationService().scheduleOneOffHadithReminder(
-          id: _notificationId * 1000 + i,
+          id: NotificationIds.hadithDaily * 1000 + i,
           title: "حديث من ${book.name}",
           body: content,
           date: scheduledDate,
@@ -142,7 +143,7 @@ class HadithNotificationService {
 
   static Future<void> _scheduleGenericFallback(TimeOfDay time) async {
     await NotificationService().scheduleHadithReminder(
-      id: _notificationId,
+      id: NotificationIds.hadithDaily,
       title: 'حديث اليوم',
       body: 'طالع حديث اليوم واقرأ من السنة النبوية الشريفة',
       time: time,

@@ -31,9 +31,14 @@ import 'package:roken_al_raha/features/Home/presention/views/AudioQuran/cubit/au
 import 'package:roken_al_raha/core/widgets/global_audio_overlay.dart';
 import 'package:roken_al_raha/services/hadith_notification_service.dart';
 import 'features/Home/presention/views/AllAzkar/services/azkar_notification_helper.dart';
+import 'features/Home/presention/views/Masbaha/services/masbaha_notification_helper.dart';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:roken_al_raha/features/FajrAlarm/presentation/view/fajr_alarm_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final welcomeService = WelcomeNotificationService();
   await welcomeService.init();
   // Initialize time zones
@@ -87,9 +92,26 @@ Future<void> initializeHeavyServices() async {
   // AdService.loadInterstitialAd();
 
   // Notifications
-  await NotificationService().init();
+  final notificationService = NotificationService();
+  await notificationService.init();
+
+  // Setup listener for notification clicks
+  notificationService.plugin.initialize(
+    const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/launcher_icon'),
+      iOS: DarwinInitializationSettings(),
+    ),
+    onDidReceiveNotificationResponse: (details) {
+      if (details.payload == 'fajr_alarm') {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const FajrAlarmScreen()),
+        );
+      }
+    },
+  );
   await HadithNotificationService.init();
   await AzkarNotificationHelper.refreshAllNotifications();
+  await MasbahaNotificationHelper.refreshAllNotifications();
 }
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

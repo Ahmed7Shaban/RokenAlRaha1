@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:adhan/adhan.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math'; // For random selection
+import '../constants/notification_ids.dart';
 import '../../features/Home/presention/views/Masbaha/date/tasbeeh_list.dart';
 import '../../features/Home/presention/views/Masbaha/date/istighfar_list.dart';
 
@@ -19,6 +20,9 @@ class NotificationService {
 
   final fln.FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       fln.FlutterLocalNotificationsPlugin();
+
+  fln.FlutterLocalNotificationsPlugin get plugin =>
+      _flutterLocalNotificationsPlugin;
 
   bool _isInitialized = false;
 
@@ -217,8 +221,8 @@ class NotificationService {
     required TimeOfDay time,
     bool isEnabled = true,
   }) async {
-    // 1. Cancel previous Hamed notification (Fixed ID: 777)
-    await cancelNotification(777);
+    // 1. Cancel previous Hamed notification
+    await cancelNotification(NotificationIds.hamedReminder);
 
     if (!isEnabled) return;
 
@@ -244,7 +248,7 @@ class NotificationService {
     }
 
     await _flutterLocalNotificationsPlugin.zonedSchedule(
-      777,
+      NotificationIds.hamedReminder,
       "كيف حال قلبك مع الله؟",
       "لا تنسَ تسجيل نعم الله عليك اليوم في مفكرة النعم 📝",
       tz.TZDateTime.from(scheduledDate, tz.local),
@@ -329,11 +333,31 @@ class NotificationService {
     await cancelPrayerCheckReminders();
 
     final prayers = [
-      {'name': 'Fajr', 'time': prayerTimes.fajr, 'id': 200},
-      {'name': 'Dhuhr', 'time': prayerTimes.dhuhr, 'id': 201},
-      {'name': 'Asr', 'time': prayerTimes.asr, 'id': 202},
-      {'name': 'Maghrib', 'time': prayerTimes.maghrib, 'id': 203},
-      {'name': 'Isha', 'time': prayerTimes.isha, 'id': 204},
+      {
+        'name': 'Fajr',
+        'time': prayerTimes.fajr,
+        'id': NotificationIds.prayerCheckBase,
+      },
+      {
+        'name': 'Dhuhr',
+        'time': prayerTimes.dhuhr,
+        'id': NotificationIds.prayerCheckBase + 1,
+      },
+      {
+        'name': 'Asr',
+        'time': prayerTimes.asr,
+        'id': NotificationIds.prayerCheckBase + 2,
+      },
+      {
+        'name': 'Maghrib',
+        'time': prayerTimes.maghrib,
+        'id': NotificationIds.prayerCheckBase + 3,
+      },
+      {
+        'name': 'Isha',
+        'time': prayerTimes.isha,
+        'id': NotificationIds.prayerCheckBase + 4,
+      },
     ];
 
     for (var prayer in prayers) {
@@ -363,8 +387,10 @@ class NotificationService {
   }
 
   Future<void> cancelPrayerCheckReminders() async {
-    for (int i = 200; i <= 204; i++) {
-      await _flutterLocalNotificationsPlugin.cancel(i);
+    for (int i = 0; i < 5; i++) {
+      await _flutterLocalNotificationsPlugin.cancel(
+        NotificationIds.prayerCheckBase + i,
+      );
     }
   }
 
@@ -415,12 +441,20 @@ class NotificationService {
     await cancelAzanNotifications();
 
     final prayers = [
-      {'name': 'Fajr', 'time': prayerTimes.fajr, 'id': 1},
-      {'name': 'Sunrise', 'time': prayerTimes.sunrise, 'id': 2},
-      {'name': 'Dhuhr', 'time': prayerTimes.dhuhr, 'id': 3},
-      {'name': 'Asr', 'time': prayerTimes.asr, 'id': 4},
-      {'name': 'Maghrib', 'time': prayerTimes.maghrib, 'id': 5},
-      {'name': 'Isha', 'time': prayerTimes.isha, 'id': 6},
+      {'name': 'Fajr', 'time': prayerTimes.fajr, 'id': NotificationIds.fajr},
+      {
+        'name': 'Sunrise',
+        'time': prayerTimes.sunrise,
+        'id': NotificationIds.sunrise,
+      },
+      {'name': 'Dhuhr', 'time': prayerTimes.dhuhr, 'id': NotificationIds.dhuhr},
+      {'name': 'Asr', 'time': prayerTimes.asr, 'id': NotificationIds.asr},
+      {
+        'name': 'Maghrib',
+        'time': prayerTimes.maghrib,
+        'id': NotificationIds.maghrib,
+      },
+      {'name': 'Isha', 'time': prayerTimes.isha, 'id': NotificationIds.isha},
     ];
 
     // Identify the correct sound file
@@ -535,8 +569,16 @@ class NotificationService {
   }
 
   Future<void> cancelAzanNotifications() async {
-    for (int i = 1; i <= 6; i++) {
-      await _flutterLocalNotificationsPlugin.cancel(i);
+    final ids = [
+      NotificationIds.fajr,
+      NotificationIds.dhuhr,
+      NotificationIds.asr,
+      NotificationIds.maghrib,
+      NotificationIds.isha,
+      NotificationIds.sunrise,
+    ];
+    for (var id in ids) {
+      await _flutterLocalNotificationsPlugin.cancel(id);
     }
   }
 
@@ -777,7 +819,7 @@ class NotificationService {
       lastIndex = index;
 
       await _scheduleSingleMasbaha(
-        id: 800 + i,
+        id: NotificationIds.tasbeehBase + i,
         title: 'تسبيح اليوم',
         body: tasbeehList[index],
         date: scheduledDate,
@@ -787,8 +829,10 @@ class NotificationService {
   }
 
   Future<void> cancelTasbeehNotifications() async {
-    for (int i = 800; i <= 806; i++) {
-      await _flutterLocalNotificationsPlugin.cancel(i);
+    for (int i = 0; i < 7; i++) {
+      await _flutterLocalNotificationsPlugin.cancel(
+        NotificationIds.tasbeehBase + i,
+      );
     }
     // Also cancel mixed legacy IDs if they exist to be clean
     await _flutterLocalNotificationsPlugin.cancel(888);
@@ -821,7 +865,7 @@ class NotificationService {
       lastIndex = index;
 
       await _scheduleSingleMasbaha(
-        id: 810 + i,
+        id: NotificationIds.istighfarBase + i,
         title: 'استغفار اليوم',
         body: istighfarList[index],
         date: scheduledDate,
@@ -831,8 +875,10 @@ class NotificationService {
   }
 
   Future<void> cancelIstighfarNotifications() async {
-    for (int i = 810; i <= 816; i++) {
-      await _flutterLocalNotificationsPlugin.cancel(i);
+    for (int i = 0; i < 7; i++) {
+      await _flutterLocalNotificationsPlugin.cancel(
+        NotificationIds.istighfarBase + i,
+      );
     }
   }
 
@@ -1076,8 +1122,58 @@ class NotificationService {
   }
 
   Future<void> cancelAllSalatOnProphetReminders() async {
-    for (int i = 900; i < 950; i++) {
-      await _flutterLocalNotificationsPlugin.cancel(i);
+    for (int i = 0; i < 50; i++) {
+      await _flutterLocalNotificationsPlugin.cancel(
+        NotificationIds.salatOnProphetBase + i,
+      );
     }
+  }
+
+  // --- FAJR ALARM SCHEDULING ---
+  Future<void> scheduleFajrAlarm({
+    required DateTime alarmTime,
+    required String title,
+    required String body,
+    required String payload,
+  }) async {
+    fln.AndroidScheduleMode scheduleMode =
+        fln.AndroidScheduleMode.exactAllowWhileIdle;
+    if (Platform.isAndroid) {
+      if (await Permission.scheduleExactAlarm.isDenied) {
+        scheduleMode = fln.AndroidScheduleMode.inexactAllowWhileIdle;
+      }
+    }
+
+    const fln.AndroidNotificationDetails androidPlatformChannelSpecifics =
+        fln.AndroidNotificationDetails(
+          'fajr_alarm_channel',
+          'منبه الفجر الذكي',
+          channelDescription: 'تنبيه ذكي لصلاة الفجر',
+          importance: fln.Importance.max,
+          priority: fln.Priority.max,
+          fullScreenIntent: true,
+          sound: fln.RawResourceAndroidNotificationSound('alarm'),
+          playSound: true,
+          audioAttributesUsage: fln.AudioAttributesUsage.alarm,
+        );
+
+    const fln.NotificationDetails platformChannelSpecifics =
+        fln.NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      10001,
+      title,
+      body,
+      tz.TZDateTime.from(alarmTime, tz.local),
+      platformChannelSpecifics,
+      androidScheduleMode: scheduleMode,
+      payload: payload,
+    );
+
+    debugPrint("✅ Fajr Alarm Scheduled via NotificationService for $alarmTime");
+  }
+
+  Future<void> cancelFajrAlarm() async {
+    await _flutterLocalNotificationsPlugin.cancel(10001);
   }
 }

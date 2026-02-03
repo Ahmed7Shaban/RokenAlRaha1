@@ -39,17 +39,21 @@ class _QiblahARViewState extends State<QiblahARView> {
   }
 
   Future<void> _initCamera() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) return;
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) return;
 
-    _controller = CameraController(
-      cameras.first,
-      ResolutionPreset.medium,
-      enableAudio: false,
-    );
+      _controller = CameraController(
+        cameras.first,
+        ResolutionPreset.medium,
+        enableAudio: false,
+      );
 
-    _initializeControllerFuture = _controller!.initialize();
-    if (mounted) setState(() {});
+      _initializeControllerFuture = _controller!.initialize();
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint("Camera initialization error: $e");
+    }
   }
 
   @override
