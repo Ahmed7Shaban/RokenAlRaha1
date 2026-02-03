@@ -61,7 +61,7 @@ class _OnboardingViewState extends State<OnboardingView> {
 
   Future<void> _finishOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_seen_onboarding', true);
+    await prefs.setBool('has_completed_onboarding', true);
     if (!mounted) return;
     Navigator.pushReplacementNamed(context, Routes.home);
   }

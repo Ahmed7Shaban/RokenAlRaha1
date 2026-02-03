@@ -22,7 +22,7 @@ class _SplahViewState extends State<SplahView> {
       if (mounted) {
         final prefs = await SharedPreferences.getInstance();
         final bool hasSeenOnboarding =
-            prefs.getBool('has_seen_onboarding') ?? false;
+            prefs.getBool('has_completed_onboarding') ?? false;
 
         if (mounted) {
           if (hasSeenOnboarding) {
