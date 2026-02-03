@@ -8,6 +8,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../../source/app_images.dart';
 import '../../../../../../core/services/notification_service.dart';
+import '../../../../../FajrAlarm/services/fajr_alarm_service.dart';
 
 part 'smart_container_state.dart';
 
@@ -177,6 +178,21 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
 
     // Also schedule prayer check reminders
     _schedulePrayerReminders(prayerTimes);
+
+    // --- Schedule Smart Fajr Alarm ---
+    // 1. Try Today's Fajr
+    FajrAlarmService().scheduleAlarm(prayerTimes.fajr);
+
+    // 2. Schedule Tomorrow's Fajr (to ensure continuity)
+    final tomorrowDate = DateComponents.from(
+      DateTime.now().add(const Duration(days: 1)),
+    );
+    final tomorrowPrayerTimes = PrayerTimes(
+      _userCoordinates!,
+      tomorrowDate,
+      params,
+    );
+    FajrAlarmService().scheduleAlarm(tomorrowPrayerTimes.fajr);
   }
 
   void _startTimer() {
