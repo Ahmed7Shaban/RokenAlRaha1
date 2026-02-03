@@ -34,7 +34,11 @@ class _SmartContainerSettingsSheetState
       'file': 'azan_yaser',
       'desc': 'أذان الحرم المكي الشريف',
     },
-    {'name': 'محمد جازي', 'file': 'mohamd_gazy', 'desc': 'أذان جميل ومؤثر'},
+    {
+      'name': 'محمد جازي',
+      'file': 'mohamd_gazy', // Matches mohamd_gazy.mp3
+      'desc': 'أذان جميل ومؤثر',
+    },
   ];
 
   @override
@@ -60,15 +64,11 @@ class _SmartContainerSettingsSheetState
           _playingFile = fileName;
         });
 
-        // Determine extension (assuming assets/Sounds/{file}.{ext})
-        // 'mohamd_gazy' is often .webm or .mp3 depending on setups,
-        // sticking to logic that recognized it as potentially special or just mp3 standard.
-        // If the user standardized on .mp3 in assets, we use .mp3.
-        // I will use .mp3 as default, and check key for gazy special case if needed.
-        // Based on previous input "mohamd_gazy.webm" in raw, it's likely webm in assets too if directly copied.
-        String extension = fileName.contains('gazy') ? 'webm' : 'mp3';
+        // Unified extension to .mp3 as requested.
+        final String assetPath = 'Sounds/$fileName.mp3';
+        debugPrint("🔊 Attempting to play preview via Settings: $assetPath");
 
-        await _audioPlayer.play(AssetSource('Sounds/$fileName.$extension'));
+        await _audioPlayer.play(AssetSource(assetPath));
 
         _audioPlayer.onPlayerComplete.listen((_) {
           if (mounted) {
@@ -79,7 +79,7 @@ class _SmartContainerSettingsSheetState
         });
       }
     } catch (e) {
-      debugPrint("Error playing preview: $e");
+      debugPrint("❌ Error playing preview via Settings: $e");
       if (mounted) {
         setState(() {
           _playingFile = null;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:roken_al_raha/core/services/storage_service.dart';
 import '../../../../routes/routes.dart';
 import '../../../../features/Onboarding/presentation/view/onboarding_view.dart';
 import '../widgets/body_splash.dart';
@@ -20,9 +20,11 @@ class _SplahViewState extends State<SplahView> {
     // Auto navigation after animations check for onboarding
     Future.delayed(const Duration(milliseconds: 3500), () async {
       if (mounted) {
-        final prefs = await SharedPreferences.getInstance();
-        final bool hasSeenOnboarding =
-            prefs.getBool('has_completed_onboarding') ?? false;
+        // Ensure storage is ready
+        await StorageService().init();
+        final bool hasSeenOnboarding = StorageService().getBool(
+          'has_completed_onboarding',
+        );
 
         if (mounted) {
           if (hasSeenOnboarding) {

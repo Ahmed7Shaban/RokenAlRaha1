@@ -3,8 +3,8 @@ import '../../../../routes/routes.dart';
 import '../widgets/onboarding_page_widget.dart';
 import '../widgets/permissions_page_widget.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:roken_al_raha/core/services/storage_service.dart';
 import 'package:roken_al_raha/core/theme/app_colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingView extends StatefulWidget {
   static const String routeName = '/onboarding';
@@ -18,33 +18,34 @@ class _OnboardingViewState extends State<OnboardingView> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     // Screen 1: Welcome
     const OnboardingPageWidget(
       title: "ركن الراحة.. واحتك الإيمانية",
       description:
           "مساحتك الخاصة للهدوء والسكينة.. رفيقك الذي يذكرك بالله في زحام الحياة، ويقربك من طاعته بكل يسر وسهولة .",
-      imagePath: "assets/Images/onboarding_welcome.png", // Generated
+      imagePath: "assets/Images/onboarding_welcome.png",
     ),
 
     // Screen 2: Features
     const OnboardingPageWidget(
       title: "كل ما يحتاجه المسلم في مكان واحد",
       description:
-          "مواقيت دقيقة، سبحة إلكترونية،  ومكتبة إسلامية شاملة بين يديك.",
-      imagePath: "assets/Images/onboarding_features.png", // Generated
+          "مواقيت دقيقة، سبحة إلكترونية، ومكتبة إسلامية شاملة بين يديك.",
+      imagePath: "assets/Images/onboarding_features.png",
     ),
 
     // Screen 3: Permissions
     const PermissionsPageWidget(),
 
     // Screen 4: Start
-    const OnboardingPageWidget(
+    OnboardingPageWidget(
       title: "ابدأ رحلة الطمأنينة",
       description:
           "انضم إلينا لنبني معاً عادات إيمانية يومية، ونملأ يومك بالذكر والراحة النفسية .",
-      imagePath: "assets/Images/onboarding_start.png", // Generated
+      imagePath: "assets/Images/onboarding_start.png",
       isLastPage: true,
+      onStartPressed: _finishOnboarding,
     ),
   ];
 
@@ -60,10 +61,15 @@ class _OnboardingViewState extends State<OnboardingView> {
   }
 
   Future<void> _finishOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_completed_onboarding', true);
+    // Ensure storage is initialized and save the value
+    await StorageService().setBool('has_completed_onboarding', true);
+
     if (!mounted) return;
-    Navigator.pushReplacementNamed(context, Routes.home);
+
+    // Use pushNamedAndRemoveUntil to prevent going back to onboarding
+    Navigator.of(
+      context,
+    ).pushNamedAndRemoveUntil(Routes.home, (Route<dynamic> route) => false);
   }
 
   @override

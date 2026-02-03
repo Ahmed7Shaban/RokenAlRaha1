@@ -15,6 +15,7 @@ import 'constants.dart';
 import 'core/ads/ad_service.dart';
 import 'core/ads/cubit/ad_cubit.dart';
 import 'core/services/welcome_notification_service.dart';
+import 'core/services/storage_service.dart';
 import 'features/Home/cubit/actionCubit/action_bottom_cubit.dart';
 import 'features/Home/presention/views/AllAzkar/views/MyAzkar/cubit/zikr_cubit.dart';
 import 'features/Home/presention/views/AllAzkar/views/MyAzkar/model/zikr_model.dart';
@@ -85,6 +86,9 @@ Future<void> initializeHeavyServices() async {
 
   await Hive.openBox<MasbahaModel>(Masbaha);
   await Hive.openBox<ZikrModel>(azkar);
+
+  // Storage Service
+  await StorageService().init();
 
   // Ads
   // await MobileAds.instance.initialize();

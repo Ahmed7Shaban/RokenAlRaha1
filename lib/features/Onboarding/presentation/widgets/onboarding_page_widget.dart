@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:roken_al_raha/core/theme/app_colors.dart';
-import '../../../../routes/routes.dart';
 
 class OnboardingPageWidget extends StatelessWidget {
   final String title;
   final String description;
   final String imagePath;
   final bool isLastPage;
+  final VoidCallback? onStartPressed;
 
   const OnboardingPageWidget({
     super.key,
@@ -16,6 +16,7 @@ class OnboardingPageWidget extends StatelessWidget {
     required this.description,
     required this.imagePath,
     this.isLastPage = false,
+    this.onStartPressed,
   });
 
   @override
@@ -87,9 +88,7 @@ class OnboardingPageWidget extends StatelessWidget {
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, Routes.home);
-                      },
+                      onPressed: onStartPressed,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
                         shape: RoundedRectangleBorder(

@@ -56,6 +56,7 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final isAzanEnabled = prefs.getBool('isAzanEnabled') ?? true;
+    // Default: 'mohamd_gazy' (Must match EXACTLY the file name in assets without extension)
     final selectedMoazzen = prefs.getString('selectedMoazzen') ?? 'mohamd_gazy';
     emit(
       state.copyWith(

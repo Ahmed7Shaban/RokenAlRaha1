@@ -20,24 +20,24 @@ class _MoazzenSelectionSheetState extends State<MoazzenSelectionSheet> {
   final List<Map<String, String>> _moazzens = [
     {
       'name': 'أحمد جلال يحيى - 1',
-      'file': 'azan_ahmed_1',
+      'file': 'azan_ahmed_1', // Matches azan_ahmed_1.mp3
       'desc': 'أذان هادئ وخاشع',
     },
     {
       'name': 'أحمد جلال يحيى - 2',
-      'file': 'azan_ahmed_2',
+      'file': 'azan_ahmed_2', // Matches azan_ahmed_2.mp3
       'desc': 'أذان بنبرة مميزة',
     },
     {
       'name': 'ياسر الدوسري',
-      'file': 'azan_yaser',
+      'file': 'azan_yaser', // Matches azan_yaser.mp3
       'desc': 'أذان الحرم المكي الشريف',
     },
-    {'name': 'محمد جازي', 'file': 'mohamd_gazy', 'desc': 'أذان جميل ومؤثر'},
-    // We keep Mishary as legacy option if needed, but since we default to Yaser if missing,
-    // it's better to show only what we have or map properly.
-    // Assuming Mishary file is missing, we might not want to list it or map it to something else in UI.
-    // For now, listing valid ones.
+    {
+      'name': 'محمد جازي',
+      'file': 'mohamd_gazy', // Matches mohamd_gazy.mp3
+      'desc': 'أذان جميل ومؤثر',
+    },
   ];
 
   @override
@@ -64,21 +64,13 @@ class _MoazzenSelectionSheetState extends State<MoazzenSelectionSheet> {
         });
 
         // PLAY Audio:
-        // We assume the user has configured assets/Sounds/{fileName}.mp3 for preview.
-        // If the file is only in raw/, we cannot play it via AssetSource easily.
-        // But commonly devs put a copy in assets for in-app play.
-        // If not, this might fail silently or log error.
+        // Unified extension to .mp3 as requested.
+        // Assuming file exists in assets/Sounds/{fileName}.mp3
+        final String assetPath = 'Sounds/$fileName.mp3';
 
-        // Let's try to play from AssetSource assuming standard path.
-        // Note: Filename in mapping doesn't have extension.
-        // 'azan_ahmed_1' -> 'assets/Sounds/azan_ahmed_1.mp3'
+        debugPrint("🔊 Attempting to play preview: $assetPath");
 
-        // Special check for 'mohamd_gazy' which is .webm in directory list BUT audio players usually prefer mp3/aac.
-        // Let's rely on standard mp3 unless we know otherwise.
-        // The directory list showed: "mohamd_gazy.webm".
-        String extension = fileName.contains('gazy') ? 'webm' : 'mp3';
-
-        await _audioPlayer.play(AssetSource('Sounds/$fileName.$extension'));
+        await _audioPlayer.play(AssetSource(assetPath));
 
         _audioPlayer.onPlayerComplete.listen((_) {
           if (mounted) {
@@ -89,7 +81,7 @@ class _MoazzenSelectionSheetState extends State<MoazzenSelectionSheet> {
         });
       }
     } catch (e) {
-      debugPrint("Error playing preview: $e");
+      debugPrint("❌ Error playing preview for ($fileName): $e");
       // Stop UI state if error
       if (mounted) {
         setState(() {
