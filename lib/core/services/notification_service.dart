@@ -993,26 +993,30 @@ class NotificationService {
       }
     }
 
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(date, tz.local),
-      fln.NotificationDetails(
-        android: fln.AndroidNotificationDetails(
-          channelId,
-          title,
-          channelDescription: 'تذكيرات يومية',
-          importance: fln.Importance.max,
-          priority: fln.Priority.high,
-          icon: '@mipmap/launcher_icon',
-          styleInformation: fln.BigTextStyleInformation(body),
+    try {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(date, tz.local),
+        fln.NotificationDetails(
+          android: fln.AndroidNotificationDetails(
+            channelId,
+            title,
+            channelDescription: 'تذكيرات يومية',
+            importance: fln.Importance.max,
+            priority: fln.Priority.high,
+            icon: '@mipmap/launcher_icon',
+            styleInformation: fln.BigTextStyleInformation(body),
+          ),
+          iOS: const fln.DarwinNotificationDetails(),
         ),
-        iOS: const fln.DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: scheduleMode,
-      payload: 'duaa_daily_random',
-    );
+        androidScheduleMode: scheduleMode,
+        payload: 'duaa_daily_random',
+      );
+    } catch (e) {
+      debugPrint("❌ Error scheduling Masbaha/Duaa (ID: $id): $e");
+    }
   }
 
   /// Cancel all Masbaha related
@@ -1089,28 +1093,33 @@ class NotificationService {
       }
     }
 
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      tz.TZDateTime.from(date, tz.local),
-      fln.NotificationDetails(
-        android: fln.AndroidNotificationDetails(
-          channelId,
-          title,
-          importance: fln.Importance.max,
-          priority: fln.Priority.high,
-          icon: '@mipmap/launcher_icon',
-          styleInformation: fln.BigTextStyleInformation(body),
+    try {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        tz.TZDateTime.from(date, tz.local),
+        fln.NotificationDetails(
+          android: fln.AndroidNotificationDetails(
+            channelId,
+            title,
+            importance: fln.Importance.max,
+            priority: fln.Priority.high,
+            icon: '@mipmap/launcher_icon',
+            styleInformation: fln.BigTextStyleInformation(body),
+          ),
+          iOS: const fln.DarwinNotificationDetails(),
         ),
-        iOS: const fln.DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: scheduleMode,
-      payload: payload,
-    );
+        androidScheduleMode: scheduleMode,
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint(
+        "❌ Error scheduling single one off notification (ID: $id): $e",
+      );
+    }
   }
 
-  // --- SALAT ON PROPHET SCHEDULING ---
   // --- SALAT ON PROPHET SCHEDULING ---
   Future<void> scheduleSalatOnProphetReminder({
     required TimeOfDay time,
@@ -1137,28 +1146,31 @@ class NotificationService {
       }
     }
 
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      "صل على الحبيب قلبك يطيب ❤️",
-      "اللهم صل وسلم على نبينا محمد وعلى آله وصحبه أجمعين.",
-      tz.TZDateTime.from(scheduledDate, tz.local),
-      const fln.NotificationDetails(
-        android: fln.AndroidNotificationDetails(
-          'salat_on_prophet_channel',
-          'الصلاة على النبي',
-          channelDescription: 'تذكير يومي بالصلاة على النبي',
-          importance: fln.Importance.max,
-          priority: fln.Priority.high,
-          icon: '@mipmap/launcher_icon',
+    try {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        "صل على الحبيب قلبك يطيب ❤️",
+        "اللهم صل وسلم على نبينا محمد وعلى آله وصحبه أجمعين.",
+        tz.TZDateTime.from(scheduledDate, tz.local),
+        const fln.NotificationDetails(
+          android: fln.AndroidNotificationDetails(
+            'salat_on_prophet_channel',
+            'الصلاة على النبي',
+            channelDescription: 'تذكير يومي بالصلاة على النبي',
+            importance: fln.Importance.max,
+            priority: fln.Priority.high,
+            icon: '@mipmap/launcher_icon',
+          ),
+          iOS: fln.DarwinNotificationDetails(),
         ),
-        iOS: fln.DarwinNotificationDetails(),
-      ),
-      androidScheduleMode: scheduleMode,
-      matchDateTimeComponents: fln.DateTimeComponents.time, // Daily repeat
-      payload: 'salat_on_prophet',
-    );
-
-    debugPrint("🔔 Salat on Prophet Scheduled at $time with ID: $id");
+        androidScheduleMode: scheduleMode,
+        matchDateTimeComponents: fln.DateTimeComponents.time, // Daily repeat
+        payload: 'salat_on_prophet',
+      );
+      debugPrint("🔔 Salat on Prophet Scheduled at $time with ID: $id");
+    } catch (e) {
+      debugPrint("❌ Error scheduling Salat on Prophet (ID: $id): $e");
+    }
   }
 
   Future<void> cancelSalatOnProphetReminder(int id) async {
@@ -1204,17 +1216,35 @@ class NotificationService {
     const fln.NotificationDetails platformChannelSpecifics =
         fln.NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      10001,
-      title,
-      body,
-      tz.TZDateTime.from(alarmTime, tz.local),
-      platformChannelSpecifics,
-      androidScheduleMode: scheduleMode,
-      payload: payload,
-    );
+    try {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        10001,
+        title,
+        body,
+        tz.TZDateTime.from(alarmTime, tz.local),
+        platformChannelSpecifics,
+        androidScheduleMode: scheduleMode,
+        payload: payload,
+      );
 
-    debugPrint("✅ Fajr Alarm Scheduled via NotificationService for $alarmTime");
+      debugPrint(
+        "✅ Fajr Alarm Scheduled via NotificationService for $alarmTime",
+      );
+    } catch (e) {
+      debugPrint("❌ Error scheduling Fajr Alarm: $e");
+      // Fallback: Try standard notification priority if alarm fails
+      try {
+        await _flutterLocalNotificationsPlugin.show(
+          10001,
+          title,
+          body,
+          platformChannelSpecifics,
+          payload: payload,
+        );
+      } catch (e2) {
+        debugPrint("❌ Fatal: Could not show fallback Fajr notification: $e2");
+      }
+    }
   }
 
   Future<void> cancelFajrAlarm() async {
