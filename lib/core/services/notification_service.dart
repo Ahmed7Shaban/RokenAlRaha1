@@ -569,39 +569,43 @@ class NotificationService {
       }
     }
 
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      fln.NotificationDetails(
-        android: fln.AndroidNotificationDetails(
-          channelId, // Use the specific channel ID for this sound
-          payload == 'Sunrise' ? 'موعد الشروق' : 'الأذان',
-          channelDescription: 'تنبيهات أوقات الصلاة',
-          importance: fln.Importance.max,
-          priority: fln.Priority.high,
-          playSound: true,
-          sound: soundFileName.isNotEmpty
-              ? fln.RawResourceAndroidNotificationSound(soundFileName)
-              : null,
-          fullScreenIntent:
-              soundFileName.isNotEmpty, // Only full screen for Azan
-          visibility: fln.NotificationVisibility.public,
-          audioAttributesUsage: fln.AudioAttributesUsage.alarm,
-          icon: '@mipmap/launcher_icon',
+    try {
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        fln.NotificationDetails(
+          android: fln.AndroidNotificationDetails(
+            channelId, // Use the specific channel ID for this sound
+            payload == 'Sunrise' ? 'موعد الشروق' : 'الأذان',
+            channelDescription: 'تنبيهات أوقات الصلاة',
+            importance: fln.Importance.max,
+            priority: fln.Priority.high,
+            playSound: true,
+            sound: soundFileName.isNotEmpty
+                ? fln.RawResourceAndroidNotificationSound(soundFileName)
+                : null,
+            fullScreenIntent:
+                soundFileName.isNotEmpty, // Only full screen for Azan
+            visibility: fln.NotificationVisibility.public,
+            audioAttributesUsage: fln.AudioAttributesUsage.alarm,
+            icon: '@mipmap/launcher_icon',
+          ),
+          iOS: fln.DarwinNotificationDetails(
+            sound: soundFileName.isNotEmpty ? '$soundFileName.mp3' : null,
+            presentSound: true,
+            interruptionLevel: fln.InterruptionLevel.timeSensitive,
+          ),
         ),
-        iOS: fln.DarwinNotificationDetails(
-          sound: soundFileName.isNotEmpty ? '$soundFileName.mp3' : null,
-          presentSound: true,
-          interruptionLevel: fln.InterruptionLevel.timeSensitive,
-        ),
-      ),
-      androidScheduleMode: scheduleMode,
-      // CRITICAL FIX: Removed matchDateTimeComponents: fln.DateTimeComponents.time
-      // This ensures we schedule EXACT dates, not recurring daily times which are incorrect for prayers.
-      payload: payload,
-    );
+        androidScheduleMode: scheduleMode,
+        // CRITICAL FIX: Removed matchDateTimeComponents: fln.DateTimeComponents.time
+        // This ensures we schedule EXACT dates, not recurring daily times which are incorrect for prayers.
+        payload: payload,
+      );
+    } catch (e) {
+      debugPrint("❌ Error scheduling Azan/Reminder (ID: $id): $e");
+    }
   }
 
   Future<void> cancelAzanNotifications() async {

@@ -11,7 +11,7 @@ class NotificationIds {
   static const int isha = 6;
 
   // --- Prayer Check Reminders (200-299) ---
-  static const int prayerCheckBase = 200;
+  static const int prayerCheckBase = 500;
   // Ranges: 200 (Fajr) to 204 (Isha)
 
   // --- Hamed / Gratitude (300) ---
