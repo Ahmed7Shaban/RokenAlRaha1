@@ -73,7 +73,7 @@ class _SalatOnProphetViewState extends State<SalatOnProphetView> {
           prefs.remove(_legacyNotifTimeKey); // Clean up legacy
         } else {
           // Default: 8 PM if nothing set
-          _reminderTimes = const [TimeOfDay(hour: 20, minute: 0)];
+          _reminderTimes = [const TimeOfDay(hour: 20, minute: 0)];
         }
       }
     });
