@@ -460,11 +460,17 @@ class NotificationService {
   }
 
   /// 3. Schedule Daily Azan Logic
-  Future<void> scheduleDailyAzan(
+  /// Modified to support batch scheduling (fixing the daily repeat flaw)
+  Future<void> scheduleAzanForPrayerTimes(
     PrayerTimes prayerTimes,
-    String moazzenKey,
-  ) async {
-    await cancelAzanNotifications();
+    String moazzenKey, {
+    int dayOffset = 0,
+  }) async {
+    // Only cancel if this is the first day (Day 0), to start fresh.
+    // However, the Cubit should handle clearing before starting the batch.
+    if (dayOffset == 0) {
+      await cancelAzanNotifications();
+    }
 
     final prayers = [
       {'name': 'Fajr', 'time': prayerTimes.fajr, 'id': NotificationIds.fajr},
@@ -491,11 +497,15 @@ class NotificationService {
     for (var prayer in prayers) {
       DateTime scheduledTime = prayer['time'] as DateTime;
       final String name = prayer['name'] as String;
-      final int id = prayer['id'] as int;
+      int baseId = prayer['id'] as int;
 
-      // Fix: If prayer time has passed for today, schedule it for tomorrow
+      // Calculate dynamic ID based on day offset (Shift by 10 per day)
+      // e.g. Day 0: 1, Day 1: 11, Day 2: 21...
+      final int id = baseId + (dayOffset * 10);
+
+      // Skip if time has passed
       if (scheduledTime.isBefore(DateTime.now())) {
-        scheduledTime = scheduledTime.add(const Duration(days: 1));
+        continue;
       }
 
       if (name == 'Sunrise') {
@@ -524,7 +534,7 @@ class NotificationService {
     }
 
     debugPrint(
-      "📅 Azan Scheduled with sound: $soundFileName on channel: $channelId",
+      "📅 Azan Scheduled for Day $dayOffset with sound: $soundFileName",
     );
   }
 
@@ -535,7 +545,7 @@ class NotificationService {
     required String body,
     required DateTime time,
     required String soundFileName,
-    required String channelId, // Required now
+    required String channelId,
     required String payload,
   }) async {
     // Check for Exact Alarm Permission specifically before scheduling
@@ -588,14 +598,14 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: scheduleMode,
-      matchDateTimeComponents:
-          fln.DateTimeComponents.time, // Added to repeat daily
+      // CRITICAL FIX: Removed matchDateTimeComponents: fln.DateTimeComponents.time
+      // This ensures we schedule EXACT dates, not recurring daily times which are incorrect for prayers.
       payload: payload,
     );
   }
 
   Future<void> cancelAzanNotifications() async {
-    final ids = [
+    final baseIds = [
       NotificationIds.fajr,
       NotificationIds.dhuhr,
       NotificationIds.asr,
@@ -603,8 +613,12 @@ class NotificationService {
       NotificationIds.isha,
       NotificationIds.sunrise,
     ];
-    for (var id in ids) {
-      await _flutterLocalNotificationsPlugin.cancel(id);
+
+    // Cancel for up to 30 days ahead to be safe
+    for (int day = 0; day < 30; day++) {
+      for (var baseId in baseIds) {
+        await _flutterLocalNotificationsPlugin.cancel(baseId + (day * 10));
+      }
     }
   }
 

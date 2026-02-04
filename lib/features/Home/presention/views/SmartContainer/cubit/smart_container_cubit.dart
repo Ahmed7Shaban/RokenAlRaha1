@@ -79,10 +79,8 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
     if (value) {
       if (state.prayerTimes != null) {
         await _notificationService.requestPermissions();
-        await _notificationService.scheduleDailyAzan(
-          state.prayerTimes!,
-          state.selectedMoazzen,
-        );
+        // await _notificationService.requestPermissions(); // Already checked/requested usually, but ok.
+        await _scheduleBatchPrayers(state.selectedMoazzen);
       }
     } else {
       await _notificationService.cancelAzanNotifications();
@@ -95,7 +93,7 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
     emit(state.copyWith(selectedMoazzen: moazzen));
 
     if (state.isAzanEnabled && state.prayerTimes != null) {
-      await _notificationService.scheduleDailyAzan(state.prayerTimes!, moazzen);
+      await _scheduleBatchPrayers(moazzen);
     }
   }
 
@@ -176,13 +174,10 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
     emit(state.copyWith(prayerTimes: prayerTimes));
 
     if (state.isAzanEnabled) {
-      _notificationService.scheduleDailyAzan(
-        prayerTimes,
-        state.selectedMoazzen,
-      );
+      _scheduleBatchPrayers(state.selectedMoazzen);
     }
 
-    // Also schedule prayer check reminders
+    // Also schedule prayer check reminders (only for today basically)
     _schedulePrayerReminders(prayerTimes);
 
     // --- Schedule Smart Fajr Alarm ---
@@ -199,6 +194,28 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
       params,
     );
     FajrAlarmService().scheduleAlarm(tomorrowPrayerTimes.fajr);
+  }
+
+  /// Schedule Azan for the next 7 days to ensure continuity even if app is not opened
+  Future<void> _scheduleBatchPrayers(String moazzen) async {
+    if (_userCoordinates == null) return;
+
+    final params = CalculationMethod.egyptian.getParameters();
+    params.madhab = Madhab.shafi;
+
+    // Clear all existing first (The service handles partial clearing, but let's be safe if needed.
+    // Actually the service's current implementation of scheduleAzanForPrayerTimes clears on dayOffset 0)
+
+    for (int i = 0; i < 7; i++) {
+      final date = DateComponents.from(DateTime.now().add(Duration(days: i)));
+      final prayerTimes = PrayerTimes(_userCoordinates!, date, params);
+
+      await _notificationService.scheduleAzanForPrayerTimes(
+        prayerTimes,
+        moazzen,
+        dayOffset: i,
+      );
+    }
   }
 
   void refreshFajrAlarm() async {
