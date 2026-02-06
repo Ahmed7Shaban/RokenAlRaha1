@@ -94,10 +94,12 @@ class FajrAlarmService {
   }
 
   // --- Scheduling ---
-  Future<void> scheduleAlarm(DateTime fajrTime) async {
+  Future<void> scheduleAlarm(DateTime fajrTime, {int dayOffset = 0}) async {
     final settings = await getSettings();
+    final int alarmId = 10001 + dayOffset;
+
     if (!settings['enabled']) {
-      await NotificationService().plugin.cancel(10001);
+      await NotificationService().plugin.cancel(alarmId);
       return;
     }
 
@@ -105,28 +107,27 @@ class FajrAlarmService {
     final DateTime alarmTime = fajrTime.subtract(Duration(minutes: offset));
 
     // Ensure we don't schedule in the past
-    // If calculated alarm time is before NOW, it means we missed it or it's for tomorrow?
-    // The calling function (SmartContainer) typically passes today's Fajr or Tomorrow's Fajr.
-    // If it passes "Today's Fajr" and it's already passed, we shouldn't schedule.
     if (alarmTime.isBefore(DateTime.now())) {
       return;
     }
 
     // Schedule High Priority Notification via Service
     await NotificationService().scheduleFajrAlarm(
+      id: alarmId,
       alarmTime: alarmTime,
       title: 'استيقظ لصلاة الفجر',
       body: 'حان موعد التحدي! أثبت استيقاظك 🕌',
       payload: 'fajr_alarm',
     );
 
-    debugPrint("✅ Fajr Alarm Scheduled for $alarmTime");
+    debugPrint("✅ Fajr Alarm Scheduled (ID: $alarmId) for $alarmTime");
   }
 
   Future<void> scheduleTestAlarm() async {
     final DateTime alarmTime = DateTime.now().add(const Duration(seconds: 10));
 
     await NotificationService().scheduleFajrAlarm(
+      id: 9999, // Unique test ID
       alarmTime: alarmTime,
       title: 'تـجـربـة منبــه الفجــر',
       body: 'هذا اختبار للمنبه.. أجب عن الأسئلة لإيقافه! 🕌',

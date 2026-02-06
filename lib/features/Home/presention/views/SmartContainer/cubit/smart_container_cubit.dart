@@ -181,10 +181,10 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
     _schedulePrayerReminders(prayerTimes);
 
     // --- Schedule Smart Fajr Alarm ---
-    // 1. Try Today's Fajr
-    FajrAlarmService().scheduleAlarm(prayerTimes.fajr);
+    // 1. Try Today's Fajr (dayOffset 0)
+    FajrAlarmService().scheduleAlarm(prayerTimes.fajr, dayOffset: 0);
 
-    // 2. Schedule Tomorrow's Fajr (to ensure continuity)
+    // 2. Schedule Tomorrow's Fajr (dayOffset 1) to ensure continuity
     final tomorrowDate = DateComponents.from(
       DateTime.now().add(const Duration(days: 1)),
     );
@@ -193,7 +193,7 @@ class SmartContainerCubit extends Cubit<SmartContainerState> {
       tomorrowDate,
       params,
     );
-    FajrAlarmService().scheduleAlarm(tomorrowPrayerTimes.fajr);
+    FajrAlarmService().scheduleAlarm(tomorrowPrayerTimes.fajr, dayOffset: 1);
   }
 
   /// Schedule Azan for the next 7 days to ensure continuity even if app is not opened

@@ -231,7 +231,7 @@ class NotificationService {
   ) async {
     const fln.AndroidNotificationChannel channel =
         fln.AndroidNotificationChannel(
-          'fajr_alarm_channel_v2',
+          'fajr_alarm_channel_v3', // Updated to v3
           'منبه الفجر الذكي',
           description: 'تنبيه ذكي لصلاة الفجر',
           importance: fln.Importance.max,
@@ -1187,6 +1187,7 @@ class NotificationService {
 
   // --- FAJR ALARM SCHEDULING ---
   Future<void> scheduleFajrAlarm({
+    required int id, // Added ID parameter
     required DateTime alarmTime,
     required String title,
     required String body,
@@ -1194,31 +1195,43 @@ class NotificationService {
   }) async {
     fln.AndroidScheduleMode scheduleMode =
         fln.AndroidScheduleMode.exactAllowWhileIdle;
+
     if (Platform.isAndroid) {
+      // Proactively request permissions
+      await requestPermissions();
+
       if (await Permission.scheduleExactAlarm.isDenied) {
+        debugPrint("⚠️ Exact Alarm permission denied, using inexact mode.");
         scheduleMode = fln.AndroidScheduleMode.inexactAllowWhileIdle;
       }
     }
 
-    const fln.AndroidNotificationDetails androidPlatformChannelSpecifics =
-        fln.AndroidNotificationDetails(
-          'fajr_alarm_channel_v2',
-          'منبه الفجر الذكي',
-          channelDescription: 'تنبيه ذكي لصلاة الفجر',
-          importance: fln.Importance.max,
-          priority: fln.Priority.max,
-          fullScreenIntent: true,
-          sound: fln.RawResourceAndroidNotificationSound('alarm'),
-          playSound: true,
-          audioAttributesUsage: fln.AudioAttributesUsage.alarm,
-        );
+    final androidPlatformChannelSpecifics = fln.AndroidNotificationDetails(
+      'fajr_alarm_channel_v3', // Updated to v3
+      'منبه الفجر الذكي',
+      channelDescription: 'تنبيه ذكي لصلاة الفجر',
+      importance: fln.Importance.max,
+      priority: fln.Priority.max,
+      fullScreenIntent: true,
+      sound: fln.RawResourceAndroidNotificationSound('alarm'),
+      playSound: true,
+      audioAttributesUsage: fln.AudioAttributesUsage.alarm,
+      category: fln.AndroidNotificationCategory.alarm,
+      visibility: fln.NotificationVisibility.public,
+    );
 
-    const fln.NotificationDetails platformChannelSpecifics =
-        fln.NotificationDetails(android: androidPlatformChannelSpecifics);
+    final platformChannelSpecifics = fln.NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+      iOS: const fln.DarwinNotificationDetails(
+        sound: 'alarm.mp3',
+        presentSound: true,
+        interruptionLevel: fln.InterruptionLevel.critical,
+      ),
+    );
 
     try {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        10001,
+        id,
         title,
         body,
         tz.TZDateTime.from(alarmTime, tz.local),
@@ -1228,21 +1241,23 @@ class NotificationService {
       );
 
       debugPrint(
-        "✅ Fajr Alarm Scheduled via NotificationService for $alarmTime",
+        "✅ Fajr Alarm Scheduled (ID: $id) via NotificationService for $alarmTime",
       );
     } catch (e) {
       debugPrint("❌ Error scheduling Fajr Alarm: $e");
-      // Fallback: Try standard notification priority if alarm fails
-      try {
-        await _flutterLocalNotificationsPlugin.show(
-          10001,
-          title,
-          body,
-          platformChannelSpecifics,
-          payload: payload,
-        );
-      } catch (e2) {
-        debugPrint("❌ Fatal: Could not show fallback Fajr notification: $e2");
+      // Fallback: Try showing it immediately if scheduling for VERY soon fails
+      if (alarmTime.difference(DateTime.now()).inSeconds < 5) {
+        try {
+          await _flutterLocalNotificationsPlugin.show(
+            id,
+            title,
+            body,
+            platformChannelSpecifics,
+            payload: payload,
+          );
+        } catch (e2) {
+          debugPrint("❌ Fatal: Could not show fallback Fajr notification: $e2");
+        }
       }
     }
   }
