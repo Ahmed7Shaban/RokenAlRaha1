@@ -134,14 +134,7 @@ flutter:
     - assets/data/fajr_smart_alarm_questions.json
     - assets/lottie/dua.json
     - assets/Images/backimg.jpg
-    - assets/json/seerah.json
-    - assets/json/seerah/seerah1.json
-    - assets/json/seerah/seerah2.json
-    - assets/json/seerah/seerah3.json
-    - assets/json/seerah/seerah4.json
     - assets/json/IslamicQuiz.json
-    - assets/json/WhiteBeads.json
-    - assets/json/BrownBeads.json
     - assets/json/names_of_allah.json
     - assets/Images/ramadan.jpg
     - assets/lottie/AudioPlaying.json
@@ -164,7 +157,7 @@ flutter:
         - asset: assets/fonts/QCF2BSMLfonts/QCF2001.TTF
     - family: uthmanic
       fonts:
-        - asset: assets/fonts/QCF2BSMLfonts/UthmanTN1 Ver10.otf
+        - asset: assets/fonts/QCF2BSMLfonts/uthmanic.otf
 
     - family: QCF_P002
       fonts:

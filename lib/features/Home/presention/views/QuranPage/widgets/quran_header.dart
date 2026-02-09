@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:roken_al_raha/features/Home/presention/views/QuranPage/quran_settings/logic/cubit/reading_settings_cubit.dart';
 import 'package:roken_al_raha/features/Home/presention/views/QuranPage/quran_settings/logic/cubit/reading_settings_state.dart';
 import 'package:roken_al_raha/features/Home/presention/views/QuranPage/quran_settings/data/models/reading_theme_model.dart';
@@ -58,8 +59,7 @@ class QuranHeader extends StatelessWidget {
                         child: Text(
                           surahName,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: "Amiri",
+                          style: GoogleFonts.amiri(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: textColor, // Dynamic Color
